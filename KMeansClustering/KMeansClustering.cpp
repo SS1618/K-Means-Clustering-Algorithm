@@ -19,7 +19,7 @@ public:
 	double getDistance(vector<double> point);
 	void addPoint(vector<double> point);
 	void clearPoints();
-	double getAvgDistance();
+	//double getAvgDistance();
 	void getGradient();
 	void changePosition();
 	vector<double> getCentroidPoint() { return self_coord; };
