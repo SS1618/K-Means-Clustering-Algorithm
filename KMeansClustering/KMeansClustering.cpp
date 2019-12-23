@@ -4,7 +4,7 @@
 #include "pch.h"
 #include <iostream>
 #include <vector>
-#include "math.h"
+#include <math.h>
 using namespace std;
 class Centroid {
 private:
@@ -14,21 +14,22 @@ private:
 	//vector<double> my_distances; //distances between centroid's points and centroid
 	vector<double> my_gradients;
 	static double eta; //learning rate
+	static double max;
 public:
-	Centroid(static int max, int dimensions);
-	double getDistance(vector<double> point);
-	void addPoint(vector<double> point);
+	Centroid(int dimensions);
+	double getDistance(vector<double> &point);
+	void addPoint(vector<double> &point);
 	void clearPoints();
-	//double getAvgDistance();
 	void getGradient();
 	void changePosition();
 	vector<double> getCentroidPoint() { return self_coord; };
 	void getClassPoints();
 };
 double Centroid::eta = 0.75;
-Centroid::Centroid(static int max,int dimensions) {
+double Centroid::max = 10.0;
+Centroid::Centroid(int dimensions) {
 	for (int i = 0; i < dimensions; i++) {
-		self_coord.push_back(rand() % max);
+		self_coord.push_back((rand() / double(RAND_MAX)) * max);
 	}
 }
 void Centroid::getClassPoints() {
@@ -40,14 +41,14 @@ void Centroid::getClassPoints() {
 		cout << "), ";
 	}
 }
-double Centroid::getDistance(vector<double>point) {
+double Centroid::getDistance(vector<double> &point) {
 	double sum = 0.0;
 	for (int i = 0; i < point.size(); i++) {
 		sum += (self_coord[i] - point[i])*(self_coord[i] - point[i]);
 	}
 	return sqrt(sum);
 }
-void Centroid::addPoint(vector<double>point) {
+void Centroid::addPoint(vector<double> &point) {
 	my_points.push_back(point);
 }
 void Centroid::clearPoints() {
@@ -62,7 +63,6 @@ void Centroid::getGradient() {
 		}
 		my_gradients[i] /= my_points.size();
 	}
-	
 }
 void Centroid::changePosition() {
 	for (int i = 0; i < self_coord.size(); i++) {
@@ -75,24 +75,22 @@ private:
 	vector<vector<double>> dataPoints;
 	static int max;
 public:
-	Data(int centroidNum, vector<vector<double>> data);
+	Data(int centroidNum, vector<vector<double>> &data);
 	void classifyPoints();
 	void changeCentroids();
 	void displayCentroids();
 	void displayCentroid_Points();
-	double classifyNewPoint(vector<double>point);
-
+	double classifyNewPoint(vector<double> &point);
 };
-int Data::max = 10;
-Data::Data(int centroidNum, vector<vector<double>> data) {
+Data::Data(int centroidNum, vector<vector<double>> &data) {
 	for (int i = 0; i < centroidNum; i++) {
-		centroids.push_back(Centroid(max,data[0].size()));
+		centroids.push_back(Centroid(data[i].size()));
 	}
 	for (int i = 0; i < data.size(); i++) {
 		dataPoints.push_back(data[i]);
 	}
 }
-double Data::classifyNewPoint(vector<double>point){
+double Data::classifyNewPoint(vector<double> &point){
 	vector<double> storeDistances;
 	for (int j = 0; j < centroids.size(); j++) {
 		storeDistances.push_back(centroids[j].getDistance(point));
@@ -155,29 +153,54 @@ void Data::changeCentroids() {
 }
 int main()
 {
-	double coordPoints[20][2] = {
-	{2.764,7},
-	{7.236,7},
-	{5.74,9.11},
-	{5.4,9.2},
-	{4.0,9.0},
-	{3.0,8.0},
-	{3.0,6.0},
-	{4.0,5.0},
-	{6.0,5.0},
-	{7.0,6.0},
-	{1.586,3},
-	{4.414,3},
-	{2.0,4.0},
-	{2.8,4.4},
-	{3.508,4.32},
-	{4.0,4.0},
-	{4.0,2.0},
-	{3.622,1.73},
+	double coordPoints[45][2] = {
+	{1.5,4},
+	{2.6,3},
+	{1.7,1.5},
+	{2.7,2.2},
+	{1.4,3.2},
+	{2.4,1.6},
+	{1.6,2.2},
+	{2.4,3.7},
+	{2.1,2.9},
+	{3.7,2.4},
+	{1,2},
+	{3.5,2.1},
+	{3.9,3.2},
+	{3.6,3.9},
+	{8,4.0},
+	{8.3,4.1},
+	{7.6,3.7},
+	{9.2,3.4},
+	{8.7,2.9},
+	{8.0,2.3},
+	{6.7,2.2},
+	{7.8,3.6},
+	{10.0,3.0},
+	{9.2,3.4},
+	{7.7,2.8},
+	{6.9,3.8},
+	{7.1,3.3},
+	{7.6,2.3},
+	{9.2,2.7},
 	{2.0,2.0},
-	{1.677,2.5}
+	{6,8},
+	{6.3,9.2},
+	{5.8,8.2},
+	{6.4,7.6},
+	{4.7,7.1},
+	{5.9,9.5},
+	{4.8,9.2},
+	{7.6,8.2},
+	{6.1,6.7},
+	{5.5,7.3},
+	{4.6,8.2},
+	{6.3,8.3},
+	{6.6,8.7},
+	{5.8,9},
+	{5.4,8.7}
 	};
-	int dataNum = 20; //number of data points
+	int dataNum = 45; //number of data points
 	int dimensions = 2; //dimensions of points
 	vector<vector<double>> data;
 	for (int i = 0; i < dataNum; i++) {
@@ -186,14 +209,15 @@ int main()
 			data.back().push_back(coordPoints[i][j]);
 		}
 	}
-	Data myData(2, data);
+	Data myData(3, data);
 	for (int i = 0; i < 2000; i++) {
 		myData.classifyPoints();
 		myData.changeCentroids();
 		myData.displayCentroids();
 	}
 	myData.displayCentroid_Points();
-	double cat = myData.classifyNewPoint({ 2.0,3.0 });
+	vector<double> testPoint = { 2.0, 3.0 };
+	double cat = myData.classifyNewPoint(testPoint);
 	cout << "Point is part of " << cat << " category" << endl;
     
 }
